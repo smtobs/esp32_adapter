@@ -2,7 +2,7 @@
 #include <net/cfg80211.h>
 
 #include "cfg80211_vendor_cmd.h"
-#include "utils.h"
+#include "common.h"
 #include "ieee80211_mlme.h"
 
 /* OUI */

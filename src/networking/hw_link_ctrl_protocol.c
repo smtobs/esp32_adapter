@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "common.h"
 #include "hw_link_ctrl_protocol.h"
 
 #define HW_LCP_START_FLAG        (0x7c)

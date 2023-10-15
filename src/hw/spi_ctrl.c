@@ -3,7 +3,7 @@
 #include <linux/interrupt.h>
 
 #include "spi_ctrl.h"
-#include "utils.h"
+#include "common.h"
 
 #define GPIO_HANDSHAKE             27
 #define GPIO_HANDSHAKE_DEBOUNCE    10 //ms

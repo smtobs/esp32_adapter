@@ -1,17 +1,20 @@
 WIFI_MODULE = esp32_adapter
 
-$(WIFI_MODULE)-objs := network_device.o \
-		esp32_cfg80211.o \
-		cfg80211_vendor_cmd.o \
-		ieee80211_mlme.o \
-		bss_info.o \
-		event.o \
-		priv.o \
-		recv.o \
-		hw_link_ctrl_protocol.o \
-		spi_ctrl.o \
-		ring_buff.o \
-		wifi_adapter.o
+EXTRA_CFLAGS += -I$(src)/include
+
+$(WIFI_MODULE)-objs := \
+	src/thread/event.o \
+	src/thread/transceiver.o \
+	src/networking/esp32_cfg80211.o \
+	src/networking/cfg80211_vendor_cmd.o \
+	src/networking/ieee80211_mlme.o \
+	src/networking/bss_info.o \
+	src/networking/priv.o \
+	src/networking/network_device.o \
+	src/networking/hw_link_ctrl_protocol.o \
+	src/hw/spi_ctrl.o \
+	src/utils/ring_buff.o \
+	src/wifi_adapter.o
 
 obj-m += $(WIFI_MODULE).o
 
@@ -31,4 +34,3 @@ install:
 #uninstall:
 #	rm -f /lib/modules/$(shell uname -r)/extra/wifi_adapter.ko
 #	depmod -a
-

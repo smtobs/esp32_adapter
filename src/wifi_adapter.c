@@ -9,9 +9,9 @@
 #include "esp32_cfg80211.h"
 #include "bss_info.h"
 #include "event.h"
-#include "recv.h"
+#include "transceiver.h"
 #include "ieee80211_mlme.h"
-#include "utils.h"
+#include "common.h"
 #include "spi_ctrl.h"
 #include "ring_buff.h"
 #include "wifi_adapter.h"
@@ -110,7 +110,7 @@ static int __init wifi_adapter_init(void)
     wifi_adapter.net_dev    = net_dev;
     wifi_adapter.wiphy      = wiphy;
 
-    bss_info_entry_init();
+    scan_bss_info_entry_init();
     buffer_init();
 
     if (wifi_adapter_thread_init() != 0)
@@ -130,7 +130,7 @@ static void __exit wifi_adapter_exit(void)
     TRACE_FUNC_ENTRY();
 
     wifi_adapter_thread_deinit();
-    bss_info_entry_delete();
+    scan_bss_info_entry_delete();
 
     net_dev_delete(wifi_adapter.net_dev);
     CFG80211_DEINIT(wifi_adapter.wiphy);

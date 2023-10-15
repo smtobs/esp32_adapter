@@ -1,7 +1,7 @@
 #include <linux/spinlock.h>
 
 #include "ring_buff.h"
-#include "utils.h"
+#include "common.h"
 
 static struct ring_buffer tx_ring_buff;
 static struct ring_buffer rx_ring_buff;
