@@ -9,6 +9,7 @@
 #include "wifi_adapter.h"
 #include "bss_info.h"
 #include "esp32_cfg80211.h"
+#include "cfg80211_vendor_cmd.h"
 
 
 #define RATETAB_ENT(_rate, _rateid, _flags) \
@@ -389,6 +390,9 @@ struct wiphy *esp32_cfg80211_init(struct wireless_adapter *adapter)
 
     priv_data_register(wiphy, adapter);
 
+    /* register for vendor command */
+    vendor_cmd_attach(wiphy);
+
     /* cfg80211 setup */
     esp32_cfg80211_setup(wiphy);
 
@@ -417,6 +421,7 @@ void esp32_cfg80211_deinit(struct wiphy *wiphy)
 
     if (wiphy)
     {
+        vendor_cmd_detach(wiphy);
         wiphy_unregister(wiphy);
         wiphy_free(wiphy);
         wiphy = NULL;
