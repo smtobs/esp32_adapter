@@ -159,6 +159,27 @@ void priv_scan_bssid_list_delete(void)
     TRACE_FUNC_EXIT();
 }
 
+struct net_device *priv_netdev_get(void)
+{
+    struct private_data *private_data;
+    struct net_device * netdev = NULL;
+
+    if (!g_wiphy)
+    {
+        return NULL;
+    }
+        
+    private_data = wiphy_priv(g_wiphy);
+    if (!private_data || !private_data->adapter || !private_data->adapter->net_dev)
+    {
+        return NULL;
+    }
+    
+    netdev = private_data->adapter->net_dev;
+
+    return netdev;
+}
+
 void priv_data_unregister(void)
 {
     TRACE_FUNC_ENTRY();
