@@ -118,11 +118,11 @@ struct ieee80211_channel *ch_num_ieee80211_channel(struct wiphy *wiphy, u8 chann
     return NULL;
 }
 
-static int inform_scan_result(struct wiphy *wiphy)
+__inline static int inform_scan_result(struct wiphy *wiphy)
 {
     struct ieee80211_channel *ch;
     struct bss_info_entry *bss_entry;
-    struct event_msg evt_msg;
+    struct event_msg evt_msg = {0};
     struct cfg80211_bss *bss;
     u8 bssid[ETH_ALEN] = {0};
     s32 notify_signal;
@@ -136,17 +136,15 @@ static int inform_scan_result(struct wiphy *wiphy)
 
     /* scan start */
     evt_msg.cmd = EVENT_SCAN_START_CMD;
-    if (wait_for_scan_event(evt_msg, 5000))
+    if (wait_for_scan_event(evt_msg, 2000))
     {
         while (priv_scan_bssid_get(bssid))
         {
-            //INFO_PRINT("priv_scan_bssid_get.. \n");
             /* get bss_entry : key - bssid */
             bss_entry = get_bss_info(bssid);
             if (bss_entry != NULL)
             {
                 notify_signal = -4600;
-
                 /* get iee80211 channel */
                 ch = ch_num_ieee80211_channel(wiphy, bss_entry->bss_info->channel);
                 if (ch == NULL)
@@ -160,7 +158,7 @@ static int inform_scan_result(struct wiphy *wiphy)
                                                         bss_entry->bss_info->mgmt_len, notify_signal, GFP_ATOMIC);
                 if (unlikely(!bss))
                 {
-                    ERROR_PRINT("bss NULL !\n");
+                    ERROR_PRINT("bss null !\n");
                     goto exit;
                 }
                 cfg80211_put_bss(wiphy, bss);
@@ -170,7 +168,7 @@ static int inform_scan_result(struct wiphy *wiphy)
     }
     else
     {
-        DEBUG_PRINT("scan time out\n");
+        //DEBUG_PRINT("scan time out\n");
     }
 exit:
     return err;
