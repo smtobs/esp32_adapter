@@ -3,6 +3,7 @@
 
 struct wireless_adapter;
 struct wiphy;
+struct net_device;
 
 typedef struct private_data
 {
@@ -17,5 +18,6 @@ void priv_scan_bssid_set(u8 *);
 int priv_scan_bssid_get(u8 *);
 void priv_scan_bssid_list_delete(void);
 void priv_data_unregister(void);
+struct net_device *priv_netdev_get(void);
 
 #endif

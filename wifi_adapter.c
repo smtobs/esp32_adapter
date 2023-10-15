@@ -12,7 +12,8 @@
 #include "recv.h"
 #include "ieee80211_mlme.h"
 #include "utils.h"
-
+#include "spi_ctrl.h"
+#include "ring_buff.h"
 #include "wifi_adapter.h"
 
 #define WIFI_NET_DEV_NAME     "esp32_wlan0"
@@ -52,12 +53,19 @@ static int __init wifi_adapter_init(void)
     struct wiphy *wiphy;
     int ret;
 
-    uint8_t mac_addr[ETH_ALEN] = {0x48, 0x22, 0x54, 0x41, 0x6c, 0x94};
+    uint8_t mac_addr[ETH_ALEN] = {0xc8, 0xc9, 0xa3, 0xc9, 0x27, 0x6c};
 
     TRACE_FUNC_ENTRY();
-
+    
     spin_lock_init(&wifi_adapter.scan_lock);
     INIT_LIST_HEAD(&wifi_adapter.scan_bssid_list.list);
+
+    /* SPI init */
+    ret = spi_init("wifi-spi-driver", MAX_SPEED_HZ, SPI_BUS_NUM, 0, SPI_MODE0);
+    if (ret != 0)
+    {
+        return -ENOMEM;
+    } 
 
     memcpy(wifi_adapter.mac_addr, mac_addr, ETH_ALEN);
 
@@ -85,7 +93,7 @@ static int __init wifi_adapter_init(void)
     }
 
     /* wdev setup */
-    wdev->wiphy = wiphy;
+    wdev->wiphy  = wiphy;
     wdev->netdev = net_dev;
 
     wdev->iftype = NL80211_IFTYPE_STATION;
@@ -98,11 +106,12 @@ static int __init wifi_adapter_init(void)
         CFG80211_DEINIT(wiphy);
     }
 
-    wifi_adapter.wdev = wdev;
-    wifi_adapter.net_dev = net_dev;
-    wifi_adapter.wiphy = wiphy;
+    wifi_adapter.wdev       = wdev;
+    wifi_adapter.net_dev    = net_dev;
+    wifi_adapter.wiphy      = wiphy;
 
     bss_info_entry_init();
+    buffer_init();
 
     if (wifi_adapter_thread_init() != 0)
     {
@@ -125,6 +134,9 @@ static void __exit wifi_adapter_exit(void)
 
     net_dev_delete(wifi_adapter.net_dev);
     CFG80211_DEINIT(wifi_adapter.wiphy);
+    
+    spi_deinit();
+    buffer_deinit();
 
     TRACE_FUNC_EXIT();
 }

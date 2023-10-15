@@ -10,6 +10,7 @@
 #include "priv.h"
 #include "event.h"
 #include "utils.h"
+#include "ring_buff.h"
 
 #define MSG_SIZE         sizeof(struct event_msg)
 #define MSG_QUEUE_NUM    8
@@ -32,15 +33,11 @@ int event_send(struct event_msg msg)
 {
     int ret = 0;
 
-    TRACE_FUNC_ENTRY();
-
     mutex_lock(&fifo_lock);
     ret = kfifo_in(&msg_fifo, &msg, MSG_SIZE);
     mutex_unlock(&fifo_lock);
 
     wake_up_all(&event_msg_queue);
-
-    TRACE_FUNC_EXIT();
 
     return ret ? 0 : -ENOMEM;
 }
@@ -50,8 +47,6 @@ int event_recv(struct event_msg *msg, unsigned long timeout)
     unsigned long timeout_jiffies;
     int ret;
 
-    TRACE_FUNC_ENTRY();
-
     if (timeout)
     {
         timeout_jiffies = msecs_to_jiffies(timeout);
@@ -59,7 +54,7 @@ int event_recv(struct event_msg *msg, unsigned long timeout)
         timeout_jiffies = wait_event_timeout(event_msg_queue, !kfifo_is_empty(&msg_fifo), timeout_jiffies);
         if (!timeout_jiffies)
         {
-            ERROR_PRINT("Timeout waiting for message\n");
+            //DEBUG_PRINT("Timeout waiting for message\n");
             return -ETIMEDOUT;
         }
     }
@@ -75,8 +70,6 @@ int event_recv(struct event_msg *msg, unsigned long timeout)
         ERROR_PRINT("ret != MSG_SIZE\n");
     }
     mutex_unlock(&fifo_lock);
-
-    TRACE_FUNC_EXIT();
 
     return 0;
 }
@@ -105,22 +98,17 @@ static void scan_process(struct event_msg recv_msg)
     int curr_scan_status;
     int cmd = recv_msg.cmd;
 
-    TRACE_FUNC_ENTRY();
-
     curr_scan_status = priv_scan_status_get();
 
     if ((cmd == EVENT_SCAN_START_CMD) && (curr_scan_status == EVENT_SCAN_READY_CMD))
     {
         priv_scan_status_set(EVENT_SCAN_START_CMD);
-        DEBUG_PRINT("scan probe request send\n");
         probe_req_send(priv_mac_addr_get(), NULL, NULL);
     }
     else if ((cmd == EVENT_SCAN_DONE_CMD) &&(curr_scan_status == EVENT_SCAN_START_CMD))
     {
         priv_scan_status_set(EVENT_SCAN_DONE_CMD);
         notify_scan_complete(&scan_event);
-
-        DEBUG_PRINT("scan done\n");
     }
     else if ((cmd == EVENT_SCAN_READY_CMD) && (curr_scan_status == EVENT_SCAN_DONE_CMD))
     {
@@ -131,13 +119,12 @@ static void scan_process(struct event_msg recv_msg)
         DEBUG_PRINT("cmd = [%d], curr_scan_status = [%d]\n", cmd, curr_scan_status);
         DEBUG_PRINT("scan_handler cmd error\n");
     }
-
-    TRACE_FUNC_EXIT();
 }
 
 static int event_handler_run(void *data)
 {
     struct event_msg msg = {0};
+    struct sk_buff *rx_buf = {0};
     int cmd;
 
     while (!kthread_should_stop()) 
@@ -153,7 +140,20 @@ static int event_handler_run(void *data)
 
                     scan_process(msg);
                     break;
-                
+
+                case EVENT_RECV_HANDLE_CMD:
+                    rx_buffer_critical_section_lock();
+
+                    rx_buf = rx_buffer_dequeue();
+                    while (rx_buf != BUFFER_EMPTY)
+                    {
+                        recv_frame_handler(rx_buf);
+                        rx_buf = rx_buffer_dequeue();
+                    }
+
+                    rx_buffer_critical_section_unlock();
+                    break;
+
                 default:
                     break;
             }

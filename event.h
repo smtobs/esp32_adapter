@@ -6,12 +6,13 @@ enum EVENT_CMD
     EVENT_SCAN_READY_CMD = 0,
     EVENT_SCAN_START_CMD,
     EVENT_SCAN_DONE_CMD,
+    EVENT_RECV_HANDLE_CMD,
 };
 
 typedef struct event_msg
 {
     int cmd;
-    u8 data[256];
+    u8 data[64];
     int data_len;
 } __attribute__((packed)) event_msg;
 

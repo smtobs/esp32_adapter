@@ -1,8 +1,10 @@
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
+#include <linux/spinlock.h>
 
 #include "utils.h"
 #include "network_device.h"
+#include "ieee80211_mlme.h"
 
 static int net_dev_open(struct net_device *);
 static int net_dev_stop(struct net_device *);
@@ -10,24 +12,51 @@ static int net_dev_set_mac_address(struct net_device *, void *);
 static struct net_device_stats *net_dev_get_stats(struct net_device *);
 static int net_dev_ioctl(struct net_device *, struct ifreq *, int);
 static void setup_net_dev(struct net_device *, u8 *);
+static netdev_tx_t net_xmit_entry(struct sk_buff *pkt, struct net_device *pnetdev);
 
+static DEFINE_SPINLOCK(xmit_lock);
 
 static struct net_device_stats net_dev_stats;
 static const struct net_device_ops netdev_ops =
 {
     .ndo_open = net_dev_open,
     .ndo_stop = net_dev_stop,
-    //.ndo_start_xmit = net_dev_xmit_entry,
+    .ndo_start_xmit = net_xmit_entry,
     .ndo_set_mac_address = net_dev_set_mac_address,
     .ndo_get_stats = net_dev_get_stats,
     .ndo_do_ioctl = net_dev_ioctl,
 };
 
-
 static int net_dev_open(struct net_device *net_dev)
 {
+	printk("net_dev_open_start!\n");
     netif_start_queue(net_dev);
+	printk("net_dev_open_stop!\n");
     return 0;
+}
+
+netdev_tx_t net_xmit_entry(struct sk_buff *pkt, struct net_device *pnetdev)
+{	
+    u8 *buf;
+    int len;
+
+    if (pkt)
+    {
+        buf = pkt->data;
+        len = pkt->len;
+    
+        spin_lock(&xmit_lock);
+        if ((pkt->data) && (pkt->len > 0) && (data_frame_send(buf, len)))
+        {
+            dev_kfree_skb(pkt);
+            spin_unlock(&xmit_lock);
+            return NETDEV_TX_OK;
+        }
+        dev_kfree_skb(pkt);
+        spin_unlock(&xmit_lock);
+    }
+
+    return NETDEV_TX_BUSY;
 }
 
 static int net_dev_set_mac_address(struct net_device *net_dev, void *addr)
