@@ -2,7 +2,7 @@
 - Raspberry Pi에서 동작하는 ESP32 Wi-Fi 어댑터 디바이스 드라이버
 ## 개발환경
 - H/W : 라즈베리파이4, esp32 devkit v1 
-- OS : Raspberry Pi OS, Kernel 5.1
+- OS : Raspberry Pi OS, Kernel 5.10.103
 - Program Language : C
 - Tools : WireShark, VScode, MobaXterm
   
@@ -20,7 +20,13 @@
 
 ## 동작 결과
 - iwconfig, ifconfig 인터페이스 출력
-![image](https://github.com/smtobs/esp32_adapter/assets/50127167/fcf73d8f-8fa4-4688-8f2e-70baf05126d1)
+![image](https://github.com/smtobs/esp32_adapter/assets/50127167/78b76da1-8311-4810-9cb1-e3feb1ba1a94)
+
+- scan 동작 결과
+![image](https://github.com/smtobs/esp32_adapter/assets/50127167/017e4fee-c9ba-456c-9deb-486dbf0518cf)
+
+- ping 동작 결과
+![image](https://github.com/smtobs/esp32_adapter/assets/50127167/2e5febbc-8b32-404d-8158-a10790966fad)
 
 
 ## 참조
