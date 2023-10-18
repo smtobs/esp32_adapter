@@ -8,7 +8,7 @@
 - Program Language : C
 - Tools : WireShark, VScode, MobaXterm
   
-## S/W 구조
+## 시스템 구조
 ![image](https://github.com/smtobs/esp32_adapter/assets/50127167/42ce9ebb-83e3-4495-997b-a3e1706e58a4)
 
 - 유저 영역과 Wi-Fi 드라이버가 통신을 하기 위하여 cfg80211 등록
