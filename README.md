@@ -1,5 +1,7 @@
 # ESP32 어댑터 드라이버
-- Raspberry Pi에서 동작하는 ESP32 Wi-Fi 어댑터 디바이스 드라이버
+- HOST에서 Network Statck을 이용하여 ESP32의 Wi-Fi Module을 제어하기 위한 ESP32 Wi-Fi Adapter Driver 개발.
+  <img width="477" alt="image" src="https://github.com/smtobs/esp32_adapter/assets/50127167/73d36243-c774-4aab-8dd4-e6ec570179d6">
+
 - ESP32 어댑터 드라이버 소스코드 주소 : https://github.com/smtobs/esp32_adapter.git
 - ESP32 모듈 소스코드 주소 : https://github.com/smtobs/esp32_module.git
 ## 개발환경
